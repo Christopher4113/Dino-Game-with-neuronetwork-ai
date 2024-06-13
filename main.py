@@ -38,6 +38,16 @@ class Dinosaur:
         self.jump = Jumping
         self.run = Running
 
+        self.dino_duck = False
+        self.dino_run = True
+        self.dino_jump = False
+
+
+        self.step_index = 0
+        self.image = self.run[0]
+        self.dino_rect = self.image.get_rect()
+        self.dino_rect.x = self.X_POS
+        self.dino_rect.y = self.Y_POS
 
 
 
