@@ -3,13 +3,17 @@ import os
 import random
 import sys
 
+# Initialize Pygame
 pygame.init()
 
+# Screen dimensions
 Screen_height = 600
 Screen_width = 1100
 
+# Set up the display
 Screen = pygame.display.set_mode((Screen_width, Screen_height))
 
+# Load images
 Running = [pygame.image.load(os.path.join("Assets/Dino", "DinoRun1.png")),
            pygame.image.load(os.path.join("Assets/Dino", "DinoRun2.png"))]
 
@@ -26,10 +30,10 @@ Large_Cactus = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.pn
                 pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus2.png")),
                 pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus3.png"))]
 
-Bird = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
+BIRD = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
         pygame.image.load(os.path.join("Assets/Bird", "Bird2.png"))]
 
-Cloud = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
+Cloud_image = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
 
 BG = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
 
@@ -109,10 +113,100 @@ class Dinosaur:
         Screen.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
 
+class Cloud:
+    def __init__(self, image, screen_width):
+        self.image = image
+        self.screen_width = screen_width
+        self.width = self.image.get_width()
+        self.x = self.screen_width + random.randint(800, 1000)
+        self.y = random.randint(50, 100)
+
+    def update(self, game_speed):
+        self.x -= game_speed
+        if self.x < -self.width:
+            self.x = self.screen_width + random.randint(2500, 3000)
+            self.y = random.randint(50, 100)
+
+    def draw(self, Screen):
+        Screen.blit(self.image, (self.x, self.y))
+
+
+class Obstacle:
+    def __init__(self, image, type):
+        self.image = image
+        self.type = type
+        self.rect = self.image[self.type].get_rect()
+        self.rect.x = Screen_width
+
+    def update(self):
+        self.rect.x -= game_speed
+        if self.rect.x < -self.rect.width:
+            obstacles.pop(0)
+
+    def draw(self, Screen):
+        Screen.blit(self.image[self.type], self.rect)
+
+
+class SmallCactus(Obstacle):
+    def __init__(self, image):
+        self.type = random.randint(0, 2)
+        super().__init__(image, self.type)
+        self.rect.y = 325
+
+
+class LargeCactus(Obstacle):
+    def __init__(self, image):
+        self.type = random.randint(0, 2)
+        super().__init__(image, self.type)
+        self.rect.y = 300
+
+
+class Bird(Obstacle):
+    def __init__(self, image):
+        self.type = 0
+        super().__init__(image, self.type)
+        self.rect.y = 250
+        self.index = 0
+
+    def draw(self, Screen):
+        if self.index >= 9:
+            self.index = 0
+        Screen.blit(self.image[self.index // 5], self.rect)
+        self.index += 1
+
+
 def main():
+    global game_speed, x_pos_bg, y_pos_bg, points, obstacles
     run = True
     clock = pygame.time.Clock()
     player = Dinosaur()
+    cloud = Cloud(Cloud_image, Screen_width)
+    game_speed = 14
+    x_pos_bg, y_pos_bg = 0, 380
+    points = 0
+    font = pygame.font.Font('freesansbold.ttf', 20)
+    obstacles = []
+
+    def score():
+        global points, game_speed
+        points += 1
+        if points % 100 == 0:
+            game_speed += 1
+
+        text = font.render("Points: " + str(points), True, (0, 0, 0))
+        textRect = text.get_rect()
+        textRect.center = (1000, 40)
+        Screen.blit(text, textRect)
+
+    def background():
+        global game_speed, x_pos_bg, y_pos_bg
+        image_width = BG.get_width()
+        Screen.blit(BG, (x_pos_bg, y_pos_bg))
+        Screen.blit(BG, (image_width + x_pos_bg, y_pos_bg))
+        if x_pos_bg <= -image_width:
+            Screen.blit(BG, (image_width + x_pos_bg, y_pos_bg))
+            x_pos_bg = 0
+        x_pos_bg -= game_speed
 
     while run:
         for event in pygame.event.get():
@@ -125,6 +219,27 @@ def main():
         Screen.fill((255, 255, 255))
         player.update(userInput)
         player.draw(Screen)
+
+        if len(obstacles) == 0:
+            if random.randint(0, 2) == 0:
+                obstacles.append(SmallCactus(Small_Cactus))
+            elif random.randint(0, 2) == 1:
+                obstacles.append(LargeCactus(Large_Cactus))
+            elif random.randint(0, 2) == 2:
+                obstacles.append(Bird(BIRD))
+
+        for obstacle in obstacles:
+            obstacle.draw(Screen)
+            obstacle.update()
+            if player.dino_rect.colliderect(obstacle.rect):
+                pygame.draw.rect(Screen, (255, 0, 0), player.dino_rect, 2)
+
+        background()
+
+        cloud.update(game_speed)
+        cloud.draw(Screen)
+
+        score()
 
         clock.tick(30)  # 30 fps
         pygame.display.update()
