@@ -2,9 +2,13 @@ import pygame
 import os
 import random
 import sys
+import time
+import neat.config
 
 # Initialize Pygame
 pygame.init()
+
+GEN = 0
 
 # Screen dimensions
 Screen_height = 600
@@ -186,6 +190,7 @@ def main():
     points = 0
     font = pygame.font.Font('freesansbold.ttf', 20)
     obstacles = []
+    death_count = 0
 
     def score():
         global points, game_speed
@@ -232,7 +237,8 @@ def main():
             obstacle.draw(Screen)
             obstacle.update()
             if player.dino_rect.colliderect(obstacle.rect):
-                pygame.draw.rect(Screen, (255, 0, 0), player.dino_rect, 2)
+                pygame.time.delay(2000)
+                death_count += 1
 
         background()
 
@@ -243,7 +249,26 @@ def main():
 
         clock.tick(30)  # 30 fps
         pygame.display.update()
+    
+def run(config_path):
+    config = neat.config.Config(
+        neat.DefaultGenome,
+        neat.DefaultReproduction,
+        neat.DefaultSpeciesSet,
+        neat.DefaultStagnation,
+        config_path)
+
+
+    p = neat.Population(config)
+
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
+
+    winner = p.run(main,50)
 
 
 if __name__ == "__main__":
-    main()
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config_feedforward.txt")
+    run(config_path)
