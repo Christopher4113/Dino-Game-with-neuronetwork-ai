@@ -287,6 +287,8 @@ def eval_genomes(genomes, config):
                         dinosaur.dino_jump = True
                         dinosaur.dino_duck = False
                         dinosaur.dino_run = False
+                        # Penalize unnecessary jumps
+                        ge[i].fitness -= 0.05
                 elif obstacle_type == 1:  # Bird
                     if output[1] > 0.5 and dinosaur.dino_rect.y == dinosaur.Y_POS:
                         if not dinosaur.dino_duck:
