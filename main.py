@@ -8,66 +8,62 @@ import math
 # Initialize Pygame
 pygame.init()
 
-GEN = 0
-
 # Screen dimensions
-Screen_height = 600
-Screen_width = 1100
+SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 1100
 
 # Set up the display
-Screen = pygame.display.set_mode((Screen_width, Screen_height))
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Load images
-Running = [pygame.image.load(os.path.join("Assets/Dino", "DinoRun1.png")),
+RUNNING = [pygame.image.load(os.path.join("Assets/Dino", "DinoRun1.png")),
            pygame.image.load(os.path.join("Assets/Dino", "DinoRun2.png"))]
 
-Jumping = pygame.image.load(os.path.join("Assets/Dino", "DinoJump.png"))
+JUMPING = pygame.image.load(os.path.join("Assets/Dino", "DinoJump.png"))
 
-Ducking = [pygame.image.load(os.path.join("Assets/Dino", "DinoDuck1.png")),
+DUCKING = [pygame.image.load(os.path.join("Assets/Dino", "DinoDuck1.png")),
            pygame.image.load(os.path.join("Assets/Dino", "DinoDuck2.png"))]
 
-Small_Cactus = [pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus1.png")),
+SMALL_CACTUS = [pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus1.png")),
                 pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus2.png")),
                 pygame.image.load(os.path.join("Assets/Cactus", "SmallCactus3.png"))]
 
-Large_Cactus = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.png")),
+LARGE_CACTUS = [pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus1.png")),
                 pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus2.png")),
                 pygame.image.load(os.path.join("Assets/Cactus", "LargeCactus3.png"))]
 
-Bird_imgs = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
+BIRD_IMGS = [pygame.image.load(os.path.join("Assets/Bird", "Bird1.png")),
              pygame.image.load(os.path.join("Assets/Bird", "Bird2.png"))]
 
-Cloud_image = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
+CLOUD_IMAGE = pygame.image.load(os.path.join("Assets/Other", "Cloud.png"))
 
 BG = pygame.image.load(os.path.join("Assets/Other", "Track.png"))
 
 FONT = pygame.font.Font('freesansbold.ttf', 20)
-STAT_FONT = pygame.font.SysFont("comicsans", 50)
 
 class Dinosaur:
     X_POS = 80
     Y_POS = 310
     JUMP_VEL = 8.5
     Y_POS_DUCK = 340
+    DUCK_DURATION = 10  # Duck duration in seconds
 
     def __init__(self):
-        self.duck_img = Ducking
-        self.run_img = Running
-        self.jump_img = Jumping
+        self.duck_img = DUCKING
+        self.run_img = RUNNING
+        self.jump_img = JUMPING
 
         self.dino_duck = False
         self.dino_run = True
         self.dino_jump = False
         self.jump_vel = self.JUMP_VEL
+        
 
         self.step_index = 0
         self.image = self.run_img[0]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.X_POS
         self.dino_rect.y = self.Y_POS
-    
-    def is_on_ground(self):
-        return self.dino_rect.y == self.Y_POS
 
     def update(self):
         if self.dino_duck:
@@ -87,6 +83,8 @@ class Dinosaur:
         self.dino_rect.y = self.Y_POS_DUCK
         self.step_index += 1
 
+        
+
     def run(self):
         self.image = self.run_img[self.step_index // 5]
         self.dino_rect = self.image.get_rect()
@@ -104,11 +102,8 @@ class Dinosaur:
             self.jump_vel = self.JUMP_VEL
             self.dino_run = True
 
-    def draw(self, Screen):
-        Screen.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
-
-    def get_mask(self):
-        return pygame.mask.from_surface(self.image)
+    def draw(self, SCREEN):
+        SCREEN.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
 class Cloud:
     def __init__(self, image, screen_width):
@@ -124,23 +119,23 @@ class Cloud:
             self.x = self.screen_width + random.randint(2500, 3000)
             self.y = random.randint(50, 100)
 
-    def draw(self, Screen):
-        Screen.blit(self.image, (self.x, self.y))
+    def draw(self, SCREEN):
+        SCREEN.blit(self.image, (self.x, self.y))
 
 class Obstacle:
     def __init__(self, image, type):
         self.image = image
         self.type = type
         self.rect = self.image[self.type].get_rect()
-        self.rect.x = Screen_width
+        self.rect.x = SCREEN_WIDTH
 
     def update(self):
         self.rect.x -= game_speed
         if self.rect.x < -self.rect.width:
             obstacles.pop(0)
 
-    def draw(self, Screen):
-        Screen.blit(self.image[self.type], self.rect)
+    def draw(self, SCREEN):
+        SCREEN.blit(self.image[self.type], self.rect)
 
 class SmallCactus(Obstacle):
     def __init__(self, image):
@@ -161,148 +156,166 @@ class Bird(Obstacle):
         self.rect.y = 250
         self.index = 0
 
-    def draw(self, Screen):
+    def draw(self, SCREEN):
         if self.index >= 9:
             self.index = 0
-        Screen.blit(self.image[self.index // 5], self.rect)
+        SCREEN.blit(self.image[self.index // 5], self.rect)
         self.index += 1
 
-def distance(pos_a,pos_b):
+def remove(index):
+    dinosaurs.pop(index)
+    ge.pop(index)
+    nets.pop(index)
+
+def distance(pos_a, pos_b):
     dx = pos_a[0]-pos_b[0]
     dy = pos_a[1]-pos_b[1]
     return math.sqrt(dx**2+dy**2)
 
-def main(genomes, config):
-    global game_speed, x_pos_bg, y_pos_bg, points, obstacles, GEN
-    run = True
+def eval_genomes(genomes, config):
+    global game_speed, x_pos_bg, y_pos_bg, obstacles, dinosaurs, ge, nets, points
     clock = pygame.time.Clock()
-    cloud = Cloud(Cloud_image, Screen_width)
-    game_speed = 14
-    x_pos_bg, y_pos_bg = 0, 380
     points = 0
-    font = pygame.font.Font('freesansbold.ttf', 20)
+
     obstacles = []
-    GEN += 1
-    nets, ge, dino = [], [], []
+    dinosaurs = []
+    ge = []
+    nets = []
 
-    for _, g in genomes:
-        net = neat.nn.FeedForwardNetwork.create(g, config)
+    x_pos_bg = 0
+    y_pos_bg = 380
+    game_speed = 20
+
+    for genome_id, genome in genomes:
+        dinosaurs.append(Dinosaur())
+        ge.append(genome)
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
         nets.append(net)
-        dino.append(Dinosaur())
-        g.fitness = 0
-        ge.append(g)
+        genome.fitness = 0
 
-    def score(gen):
+    def score():
         global points, game_speed
         points += 1
         if points % 100 == 0:
             game_speed += 1
+        text = FONT.render(f'Points:  {str(points)}', True, (0, 0, 0))
+        SCREEN.blit(text, (950, 50))
 
-        text = font.render("Points: " + str(points), True, (0, 0, 0))
-        textRect = text.get_rect()
-        textRect.center = (1000, 40)
-        Screen.blit(text, textRect)
-        text = STAT_FONT.render("Gen: " + str(gen), 1, (0, 0, 0))
-        Screen.blit(text, (10, 10))
+    def statistics():
+        global dinosaurs, game_speed, ge
+        text_1 = FONT.render(f'Dinosaurs Alive:  {str(len(dinosaurs))}', True, (0, 0, 0))
+        text_2 = FONT.render(f'Generation:  {pop.generation+1}', True, (0, 0, 0))
+        text_3 = FONT.render(f'Game Speed:  {str(game_speed)}', True, (0, 0, 0))
+
+        SCREEN.blit(text_1, (50, 450))
+        SCREEN.blit(text_2, (50, 480))
+        SCREEN.blit(text_3, (50, 510))
 
     def background():
-        global game_speed, x_pos_bg, y_pos_bg
+        global x_pos_bg, y_pos_bg
         image_width = BG.get_width()
-        Screen.blit(BG, (x_pos_bg, y_pos_bg))
-        Screen.blit(BG, (image_width + x_pos_bg, y_pos_bg))
+        SCREEN.blit(BG, (x_pos_bg, y_pos_bg))
+        SCREEN.blit(BG, (image_width + x_pos_bg, y_pos_bg))
         if x_pos_bg <= -image_width:
-            Screen.blit(BG, (image_width + x_pos_bg, y_pos_bg))
             x_pos_bg = 0
         x_pos_bg -= game_speed
 
+    run = True
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        jump_cooldown = 5
-        jump_cool = [0] * len(dino)
+        SCREEN.fill((255, 255, 255))
 
-        for x, d in enumerate(dino):
-            ge[x].fitness += 0.1
+        for dinosaur in dinosaurs:
+            dinosaur.update()
+            dinosaur.draw(SCREEN)
 
-            # Determine inputs for the neural network
-            closest_obstacle = obstacles[0].rect if obstacles else None
-            obstacle_type = obstacles[0].type if obstacles else None
-            output = nets[x].activate((d.dino_rect.y,distance((d.dino_rect.x,d.dino_rect.y),closest_obstacle.rect.midtop)))
-
-            if output[0] > 0.5 and d.is_on_ground() and jump_cooldown[x] == 0:  # Jump condition
-                d.dino_jump = True
-                d.dino_run = False
-                d.dino_duck = False
-                jump_cooldown[x] = jump_cool
-
-            if jump_cooldown[x] > 0:
-                jump_cooldown[x] -= 1 
-            elif obstacle_type == 2 and not d.dino_jump:  # Duck condition (type 2 is Bird)
-                d.dino_duck = True
-                d.dino_run = False
-                d.dino_jump = False
-            else:
-                d.dino_run = True
-                d.dino_jump = False
-                d.dino_duck = False
-
-            d.update()
-
-        for obstacle in list(obstacles):
-            obstacle.update()
-            for x, d in enumerate(dino):
-                if obstacle.rect.colliderect(d.dino_rect):
-                    ge[x].fitness -= 1
-                    nets.pop(x)
-                    ge.pop(x)
-                    dino.pop(x)
-
-        if len(dino) == 0:
+        if len(dinosaurs) == 0:
             break
 
         if len(obstacles) == 0:
             obstacle_type = random.randint(0, 2)
             if obstacle_type == 0:
-                obstacles.append(SmallCactus(Small_Cactus))
+                obstacles.append(SmallCactus(SMALL_CACTUS))
             elif obstacle_type == 1:
-                obstacles.append(LargeCactus(Large_Cactus))
+                obstacles.append(LargeCactus(LARGE_CACTUS))
             else:
-                obstacles.append(Bird(Bird_imgs))
-
-        Screen.fill((255, 255, 255))
-        for d in dino:
-            d.draw(Screen)
-
-        cloud.draw(Screen)
-        cloud.update(game_speed)
-
-        background()
-        score(GEN)
+                obstacles.append(Bird(BIRD_IMGS))
 
         for obstacle in obstacles:
-            obstacle.draw(Screen)
+            obstacle.draw(SCREEN)
+            obstacle.update()
+            for i, dinosaur in enumerate(dinosaurs):
+                if dinosaur.dino_rect.colliderect(obstacle.rect):
+                    ge[i].fitness -= 1
+                    remove(i)
 
-        pygame.display.update()
+        for i, dinosaur in enumerate(dinosaurs):
+            ge[i].fitness += 0.1
+
+            if len(obstacles) > 0:
+                closest_obstacle = obstacles[0]
+                obstacle_type = 1 if isinstance(closest_obstacle, Bird) else 0
+                output = nets[i].activate((
+                    dinosaur.dino_rect.y,
+                    distance((dinosaur.dino_rect.x, dinosaur.dino_rect.y), closest_obstacle.rect.midtop),
+                    obstacle_type
+                ))
+
+                # Decision based on obstacle type and neural network output
+                if obstacle_type == 0 or 1:  # Cactus
+                    if output[0] > 0.5 and dinosaur.dino_rect.y == dinosaur.Y_POS:
+                        dinosaur.dino_jump = True
+                        dinosaur.dino_duck = False
+                        dinosaur.dino_run = False
+                elif obstacle_type == 1:  # Bird
+                    if output[1] > 0.5 and dinosaur.dino_rect.y == dinosaur.Y_POS:
+                        # Start ducking if not already ducking
+                        if not dinosaur.dino_duck:
+                            dinosaur.dino_duck = True
+                            dinosaur.duck_start_time = pygame.time.get_ticks()  # Record duck start time
+                        else:
+                            # Check if 5 seconds have passed since ducking started
+                            current_time = pygame.time.get_ticks()
+                            if (current_time - dinosaur.duck_start_time) / 1000 > Dinosaur.DUCK_DURATION:
+                                dinosaur.dino_duck = False  # Stop ducking after 5 seconds
+                                dinosaur.dino_run = True  # Resume running
+
+                        dinosaur.dino_jump = False
+                        dinosaur.dino_run = False
+                    else:
+                        dinosaur.dino_duck = False
+                        dinosaur.dino_run = True
+                else:
+                    dinosaur.dino_duck = False
+                    dinosaur.dino_run = True
+           #else:
+                #dinosaur.dino_duck = False
+                #dinosaur.dino_run = True
+
+
+        background()
+        statistics()
+        score()
         clock.tick(30)
+        pygame.display.update()
 
-
-def run(config_file):
+def run(config_path):
+    global pop
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                 neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                                config_file)
+                                config_path)
 
-    p = neat.Population(config)
-    p.add_reporter(neat.StdOutReporter(True))
+    pop = neat.Population(config)
+    pop.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
-
-    winner = p.run(main, 50)
+    pop.add_reporter(stats)
+    pop.run(eval_genomes, 50)
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, "config_feedforward.txt")
     run(config_path)
-
