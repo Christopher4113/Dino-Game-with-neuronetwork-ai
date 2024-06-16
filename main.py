@@ -46,7 +46,7 @@ class Dinosaur:
     Y_POS = 310
     JUMP_VEL = 8.5
     Y_POS_DUCK = 340
-    DUCK_DURATION = 10  # Duck duration in seconds
+    DUCK_DURATION = 5  # Duck duration in seconds
 
     def __init__(self):
         self.duck_img = DUCKING
@@ -57,7 +57,7 @@ class Dinosaur:
         self.dino_run = True
         self.dino_jump = False
         self.jump_vel = self.JUMP_VEL
-        
+        self.duck_start_time = 0  # Initialize duck start time
 
         self.step_index = 0
         self.image = self.run_img[0]
@@ -68,9 +68,9 @@ class Dinosaur:
     def update(self):
         if self.dino_duck:
             self.duck()
-        if self.dino_run:
+        elif self.dino_run:
             self.run()
-        if self.dino_jump:
+        elif self.dino_jump:
             self.jump()
 
         if self.step_index >= 10:
@@ -83,7 +83,11 @@ class Dinosaur:
         self.dino_rect.y = self.Y_POS_DUCK
         self.step_index += 1
 
-        
+        # Check if 5 seconds have passed since ducking started
+        current_time = pygame.time.get_ticks()
+        if (current_time - self.duck_start_time) / 1000 > self.DUCK_DURATION:
+            self.dino_duck = False
+            self.dino_run = True
 
     def run(self):
         self.image = self.run_img[self.step_index // 5]
@@ -104,6 +108,7 @@ class Dinosaur:
 
     def draw(self, SCREEN):
         SCREEN.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
+
 
 class Cloud:
     def __init__(self, image, screen_width):
@@ -151,13 +156,12 @@ class LargeCactus(Obstacle):
 
 class Bird(Obstacle):
     def __init__(self, image):
-        self.type = 0
-        super().__init__(image, self.type)
+        super().__init__(image, 0)  # Bird is always of type 0
         self.rect.y = 250
         self.index = 0
 
     def draw(self, SCREEN):
-        if self.index >= 9:
+        if self.index >= 10:
             self.index = 0
         SCREEN.blit(self.image[self.index // 5], self.rect)
         self.index += 1
@@ -248,10 +252,23 @@ def eval_genomes(genomes, config):
         for obstacle in obstacles:
             obstacle.draw(SCREEN)
             obstacle.update()
+
             for i, dinosaur in enumerate(dinosaurs):
                 if dinosaur.dino_rect.colliderect(obstacle.rect):
                     ge[i].fitness -= 1
                     remove(i)
+
+                    if isinstance(obstacle, Bird):
+                        # Adjust dinosaur behavior when encountering a bird
+                        if not dinosaur.dino_duck:
+                            dinosaur.dino_duck = True
+                            dinosaur.duck_start_time = pygame.time.get_ticks()
+                            dinosaur.dino_run = False
+                            dinosaur.dino_jump = False
+                    else:
+                        dinosaur.dino_duck = False
+                        dinosaur.dino_run = True
+                        dinosaur.dino_jump = False
 
         for i, dinosaur in enumerate(dinosaurs):
             ge[i].fitness += 0.1
@@ -265,43 +282,38 @@ def eval_genomes(genomes, config):
                     obstacle_type
                 ))
 
-                # Decision based on obstacle type and neural network output
-                if obstacle_type == 0 or 1:  # Cactus
+                if obstacle_type == 0:  # Cactus
                     if output[0] > 0.5 and dinosaur.dino_rect.y == dinosaur.Y_POS:
                         dinosaur.dino_jump = True
                         dinosaur.dino_duck = False
                         dinosaur.dino_run = False
                 elif obstacle_type == 1:  # Bird
                     if output[1] > 0.5 and dinosaur.dino_rect.y == dinosaur.Y_POS:
-                        # Start ducking if not already ducking
                         if not dinosaur.dino_duck:
                             dinosaur.dino_duck = True
-                            dinosaur.duck_start_time = pygame.time.get_ticks()  # Record duck start time
-                        else:
-                            # Check if 5 seconds have passed since ducking started
-                            current_time = pygame.time.get_ticks()
-                            if (current_time - dinosaur.duck_start_time) / 1000 > Dinosaur.DUCK_DURATION:
-                                dinosaur.dino_duck = False  # Stop ducking after 5 seconds
-                                dinosaur.dino_run = True  # Resume running
-
-                        dinosaur.dino_jump = False
-                        dinosaur.dino_run = False
+                            dinosaur.duck_start_time = pygame.time.get_ticks()
+                            dinosaur.dino_run = False
+                            dinosaur.dino_jump = False
                     else:
-                        dinosaur.dino_duck = False
-                        dinosaur.dino_run = True
-                else:
-                    dinosaur.dino_duck = False
-                    dinosaur.dino_run = True
-           #else:
-                #dinosaur.dino_duck = False
-                #dinosaur.dino_run = True
-
+                        if isinstance(closest_obstacle, Bird):
+                            if dinosaur.dino_rect.x > closest_obstacle.rect.x + closest_obstacle.rect.width:
+                                # Dinosaur has passed the bird, stop ducking
+                                dinosaur.dino_duck = False
+                                dinosaur.dino_run = True
+                                dinosaur.dino_jump = False
+                        else:
+                            dinosaur.dino_duck = False
+                            dinosaur.dino_run = True
+                            dinosaur.dino_jump = False
 
         background()
         statistics()
         score()
         clock.tick(30)
         pygame.display.update()
+
+
+
 
 def run(config_path):
     global pop
