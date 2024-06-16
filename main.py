@@ -3,6 +3,7 @@ import os
 import random
 import sys
 import neat
+import math
 
 # Initialize Pygame
 pygame.init()
@@ -166,6 +167,11 @@ class Bird(Obstacle):
         Screen.blit(self.image[self.index // 5], self.rect)
         self.index += 1
 
+def distance(pos_a,pos_b):
+    dx = pos_a[0]-pos_b[0]
+    dy = pos_a[1]-pos_b[1]
+    return math.sqrt(dx**2+dy**2)
+
 def main(genomes, config):
     global game_speed, x_pos_bg, y_pos_bg, points, obstacles, GEN
     run = True
@@ -215,21 +221,25 @@ def main(genomes, config):
                 pygame.quit()
                 sys.exit()
 
+        jump_cooldown = 5
+        jump_cool = [0] * len(dino)
+
         for x, d in enumerate(dino):
             ge[x].fitness += 0.1
 
             # Determine inputs for the neural network
             closest_obstacle = obstacles[0].rect if obstacles else None
             obstacle_type = obstacles[0].type if obstacles else None
-            output = nets[x].activate((d.dino_rect.y,
-                                       1 if closest_obstacle else 0,  # Flag for obstacle presence
-                                       closest_obstacle.y - d.dino_rect.y if closest_obstacle else 0,
-                                       closest_obstacle.x - d.dino_rect.x if closest_obstacle else 0))
+            output = nets[x].activate((d.dino_rect.y,distance((d.dino_rect.x,d.dino_rect.y),closest_obstacle.rect.midtop)))
 
-            if output[0] > 0.5 and d.is_on_ground():  # Jump condition
+            if output[0] > 0.5 and d.is_on_ground() and jump_cooldown[x] == 0:  # Jump condition
                 d.dino_jump = True
                 d.dino_run = False
                 d.dino_duck = False
+                jump_cooldown[x] = jump_cool
+
+            if jump_cooldown[x] > 0:
+                jump_cooldown[x] -= 1 
             elif obstacle_type == 2 and not d.dino_jump:  # Duck condition (type 2 is Bird)
                 d.dino_duck = True
                 d.dino_run = False
