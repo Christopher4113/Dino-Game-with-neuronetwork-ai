@@ -1,33 +1,81 @@
-# Dinosaur Game AI using NEAT
+# Dino Game AI
 
-This project is an implementation of the classic dinosaur game using NEAT (NeuroEvolution of Augmenting Topologies) to evolve neural networks that can play the game. The project is built with Python and Pygame.
+This project uses NEAT (NeuroEvolution of Augmenting Topologies) to train an AI to play a Dino game.
+
+## Features
+
+- Train an AI to play the Dino game.
+- Use NEAT for neural network evolution.
+- Visualize the AI's learning process.
+
+## Prerequisites
+
+- Python installed on your system.
+- Required Python packages listed in `requirements.txt`.
 
 ## Installation
 
-To get started, you'll need to install the necessary dependencies. It's recommended to use a virtual environment for managing dependencies.
+1. **Clone the repository:**
 
-### Create a Virtual Environment
+    ```bash
+    git clone https://github.com/YourUsername/Dino-Game-AI.git
+    cd Dino-Game-AI
+    ```
 
-```bash
-python -m venv venv
+2. **Create a virtual environment:**
 
-On windows:
-venv\Scripts\activate
+    ```bash
+    python -m venv venv
+    ```
 
-On macOS and Linux:
-source venv/bin/activate
+3. **Activate the virtual environment:**
 
-Install Dependencies
-pip install -r requirements.txt
+    On Windows:
+    ```bash
+    venv\Scripts\activate
+    ```
 
+    On macOS and Linux:
+    ```bash
+    source venv/bin/activate
+    ```
 
-Running the Project
-To run the project, execute the following command:
+4. **Install the required dependencies:**
 
-python main.py
+    ```bash
+    pip install -r requirements.txt
+    ```
 
+## Usage
 
-File Structure
+1. **Start the application:**
+
+    ```bash
+    python main.py
+    ```
+
+2. **Observe the AI playing the Dino game and learning over time.**
+
+3. **Close the game window to stop the execution.**
+
+## Configuration
+
+The NEAT configuration is specified in the `config_feedforward.txt` file. You can adjust the parameters as needed to fine-tune the performance of the neural networks.
+
+## Code Explanation
+
+### Project Setup
+
+The project uses Pygame for the game environment and NEAT for evolving the neural networks. The main script initializes the game, sets up the NEAT algorithm, and runs the training loop.
+
+### Dependencies
+
+- **pygame**: For creating the Dino game environment.
+- **neat-python**: For implementing the NEAT algorithm.
+
+### File Structure
+
+```plaintext
 project_directory/
 │
 ├── Assets/
@@ -55,10 +103,3 @@ project_directory/
 ├── config_feedforward.txt
 ├── requirements.txt
 └── README.md
-
-
-Configuration
-The NEAT configuration is specified in the config_feedforward.txt file. You can adjust the parameters as needed to fine-tune the performance of the neural networks.
-
-Controls
-The game is controlled by the AI, but you can close the game window to stop the execution.
