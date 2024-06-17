@@ -1,39 +1,33 @@
-Dino Game AI
-This project uses NEAT (NeuroEvolution of Augmenting Topologies) to train an AI to play a Dino game.
+# Dinosaur Game AI using NEAT
 
-Setup
-Create a Virtual Environment
-Create a virtual environment to manage project dependencies.
+This project is an implementation of the classic dinosaur game using NEAT (NeuroEvolution of Augmenting Topologies) to evolve neural networks that can play the game. The project is built with Python and Pygame.
 
-bash
-Copy code
+## Installation
+
+To get started, you'll need to install the necessary dependencies. It's recommended to use a virtual environment for managing dependencies.
+
+### Create a Virtual Environment
+
+```bash
 python -m venv venv
-Activate the Virtual Environment
-On Windows:
 
-bash
-Copy code
+On windows:
 venv\Scripts\activate
+
 On macOS and Linux:
-
-bash
-Copy code
 source venv/bin/activate
-Install Dependencies
-Install the required dependencies using pip.
 
-bash
-Copy code
+Install Dependencies
 pip install -r requirements.txt
+
+
 Running the Project
 To run the project, execute the following command:
 
-bash
-Copy code
 python main.py
+
+
 File Structure
-css
-Copy code
 project_directory/
 │
 ├── Assets/
@@ -61,8 +55,10 @@ project_directory/
 ├── config_feedforward.txt
 ├── requirements.txt
 └── README.md
+
+
 Configuration
 The NEAT configuration is specified in the config_feedforward.txt file. You can adjust the parameters as needed to fine-tune the performance of the neural networks.
 
 Controls
-The game is controlled by the AI. You can close the game window to stop the execution.
+The game is controlled by the AI, but you can close the game window to stop the execution.
