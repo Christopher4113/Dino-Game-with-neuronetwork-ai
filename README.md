@@ -18,8 +18,8 @@ This project uses NEAT (NeuroEvolution of Augmenting Topologies) to train an AI 
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/YourUsername/Dino-Game-AI.git
-    cd Dino-Game-AI
+    git clone https://github.com/YourUsername/Dino-Game-with-neuronetwork-ai.git
+    cd Dino-Game-with-neuronetwork-ai
     ```
 
 2. **Create a virtual environment:**
