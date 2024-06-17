@@ -303,6 +303,7 @@ def eval_genomes(genomes, config):
                                 dinosaur.dino_duck = False
                                 dinosaur.dino_run = True
                                 dinosaur.dino_jump = False
+                                
                         else:
                             dinosaur.dino_duck = False
                             dinosaur.dino_run = True
