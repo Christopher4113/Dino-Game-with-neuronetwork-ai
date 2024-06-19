@@ -188,7 +188,7 @@ def eval_genomes(genomes, config):
 
     x_pos_bg = 0
     y_pos_bg = 380
-    game_speed = 18
+    game_speed = 20
 
     for genome_id, genome in genomes:
         dinosaurs.append(Dinosaur())
