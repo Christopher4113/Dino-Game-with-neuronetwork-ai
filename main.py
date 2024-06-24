@@ -309,7 +309,7 @@ def eval_genomes(genomes, config):
                             dinosaur.dino_run = True
                             dinosaur.dino_jump = False
 
-        
+        background()
         statistics()
         score()
         clock.tick(30)
